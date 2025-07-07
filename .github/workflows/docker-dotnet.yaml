@@ -18,24 +18,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up .NET 8 SDK
+      - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      - name: Build
-        run: dotnet build --configuration Release
+      - name: Build .NET App
+        run: dotnet build -c Release
 
       - name: Publish
         run: dotnet publish -c Release -o out
 
       - name: Set image tag
         id: set_tag
-        run: |
-          echo "image_tag=latest" >> $GITHUB_OUTPUT
+        run: echo "image_tag=latest" >> $GITHUB_OUTPUT
 
       - name: Build Docker image
-        run: docker build -t $DOCKER_USERNAME/$IMAGE_NAME:${{ steps.set_tag.outputs.image_tag }} .
+        run: docker build -t $DOCKER_USERNAME/$IMAGE_NAME:latest .
+
+      - name: Save Docker image as tar
+        run: docker save $DOCKER_USERNAME/$IMAGE_NAME:latest -o mycoreapp.tar
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: mycoreapp.tar
 
   approve-and-push:
     needs: build
@@ -43,9 +51,18 @@ jobs:
     environment:
       name: production
       url: https://hub.docker.com/repository/docker/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}
+
     steps:
+      - name: Download image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+
+      - name: Load Docker image
+        run: docker load -i mycoreapp.tar
+
       - name: Log in to Docker
-        run: echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+        run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
       - name: Push Docker image
-        run: docker push $DOCKER_USERNAME/$IMAGE_NAME:${{ needs.build.outputs.image_tag }}
+        run: docker push $DOCKER_USERNAME/$IMAGE_NAME:latest
