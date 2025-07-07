@@ -1,22 +1,21 @@
-# Use the official .NET SDK image to build and publish the app
+# Stage 1: Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copy csproj and restore as distinct layers
 COPY *.csproj ./
 RUN dotnet restore
 
-# Copy the rest of the source code
 COPY . ./
-RUN dotnet publish -c Release -o out
+RUN dotnet publish -c Release -o /app/publish
 
-# Use the ASP.NET runtime image for the final container
+# Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-COPY --from=build /app/out .
 
-# Expose port (if it's a web app)
-EXPOSE 80
+COPY --from=build /app/publish .
 
-# Start the app
+# Important: set ASP.NET Core to listen on port 5109 (on all interfaces)
+ENV ASPNETCORE_URLS=http://+:5109
+
+EXPOSE 5109
 ENTRYPOINT ["dotnet", "MyCoreApp.dll"]
