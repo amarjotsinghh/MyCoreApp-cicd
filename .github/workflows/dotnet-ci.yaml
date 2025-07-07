@@ -29,4 +29,4 @@ jobs:
         - name: Run Tests
           run: dotnet test MyCoreApp.sln --no-build --verbosity normal
 
-          
+          #comment added
