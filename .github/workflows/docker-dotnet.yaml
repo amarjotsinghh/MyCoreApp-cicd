@@ -34,7 +34,7 @@ jobs:
               run: echo " image_tag=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
 
             - name: Build Docker image
-              run: docker build -t $DOCKER_USERNAME/$IMAGE_NAME:${{ steps.tag.outputs.image_tag }}
+              run: docker build -t $DOCKER_USERNAME/$IMAGE_NAME:${{ steps.tag.outputs.image_tag }} .
               
 
     approve-and-push:
