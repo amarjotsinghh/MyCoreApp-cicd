@@ -1,51 +1,51 @@
 name: Build and Push Docker Image
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
 
 env:
-    IMAGE_NAME: mycoreapp
-    DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-    DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  IMAGE_NAME: mycoreapp
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        outputs:
-            image_tag: ${{ steps.tag.outputs.image_tag }}
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.set_tag.outputs.image_tag }}
 
-        steps:
-            - name: checkout code
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Set up .NET 8 SDK
-              uses: actions/setup-dotnet@v4
-              with:
-                dotnet-version: '8.0.x'
-            
-            - name: Build
-              run: dotnet build --configuration Release
+      - name: Set up .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
-            - name: Publish
-              run: dotnet publish -c Release -o out
+      - name: Build
+        run: dotnet build --configuration Release
 
-            - name: Set image tag
-              id: tag
-              run: echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+      - name: Publish
+        run: dotnet publish -c Release -o out
 
-            - name: Build Docker image
-              run: docker build -t $DOCKER_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
-                    
+      - name: Set image tag
+        id: set_tag
+        run: |
+          echo "image_tag=latest" >> $GITHUB_OUTPUT
 
-    approve-and-push:
-        needs: build
-        runs-on: ubuntu-latest
-        environment:
-            name: production
-            url: https://hub.docker.com/repository/docker/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}
-        steps:
-            - name: Log in to Docker
-              run: echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+      - name: Build Docker image
+        run: docker build -t $DOCKER_USERNAME/$IMAGE_NAME:${{ steps.set_tag.outputs.image_tag }} .
 
-            - name: Push Docker image
-              run: docker push $DOCKER_USERNAME/$IMAGE_NAME:$IMAGE_TAG
+  approve-and-push:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://hub.docker.com/repository/docker/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}
+    steps:
+      - name: Log in to Docker
+        run: echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+
+      - name: Push Docker image
+        run: docker push $DOCKER_USERNAME/$IMAGE_NAME:${{ needs.build.outputs.image_tag }}
