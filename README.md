@@ -88,21 +88,3 @@ https://<your-app-name>.azurewebsites.net
 ```
 
 ---
-
-## 📋 License
-
-MIT License © 2025 Amarjot Singh
-
-```
-
----
-
-Just copy and paste this into a file named `README.md` at the root of your repo.
-
-Let me know if you'd like to:
-- Add deployment screenshots or badges
-- Document environment variables
-- Make it more beginner-friendly
-
-Happy to tweak it!
-```
