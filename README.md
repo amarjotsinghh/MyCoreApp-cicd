@@ -1,127 +1,108 @@
-MyCoreApp
-MyCoreApp is a .NET-based web application deployed as a Docker container on Azure Web App for Linux. The project includes a fully automated CI/CD pipeline using GitHub Actions to build, push the Docker image to Docker Hub, and deploy to Azure.
-Table of Contents
+Absolutely! Here's your **complete `README.md` file** in Markdown format, with the matrix build section **fully removed** and ready to be saved in your repo:
 
-Overview
-Prerequisites
-Project Structure
-Setup Instructions
-Local Development
-Docker Setup
-CI/CD Pipeline
-Azure Deployment
+---
 
+````markdown
+# MyCoreApp 🚀
 
-Environment Variables
-Contributing
-License
+A .NET 8 Web Application containerized with Docker and deployed to Azure App Service using GitHub Actions.
 
-Overview
-MyCoreApp is a scalable .NET web application designed to run in a containerized environment. The application is containerized using Docker, stored in Docker Hub, and deployed to Azure Web App for Linux. The CI/CD pipeline, implemented with GitHub Actions, automates the build, test, image push, and deployment processes.
-Prerequisites
+---
 
-.NET SDK (version compatible with your app)
-Docker Desktop
-Azure CLI
-GitHub Account
-Docker Hub Account
-Azure Subscription
-Git installed on your machine
+## 📦 Features
 
-Project Structure
-MyCoreApp/
-├── MyCoreApp/                # .NET application source code
-├── Dockerfile                # Docker configuration for containerizing the app
-├── .github/workflows/        # GitHub Actions CI/CD workflow files
-├── README.md                 # Project documentation
-├── .gitignore                # Git ignore file for .NET and Docker
+- ✅ .NET 8 Web App
+- 🐳 Dockerized for easy container deployment
+- 🤖 GitHub Actions CI/CD
+  - Build & push Docker image to Docker Hub
+  - Manual approval before push
+- ☁️ Deploy to Azure App Service (Linux Container)
 
-Setup Instructions
-Local Development
+---
 
-Clone the repository:git clone https://github.com/your-username/MyCoreApp.git
-cd MyCoreApp
+## 🚀 Quick Start
 
+### 1. Clone this repo
 
-Restore dependencies and run the application:dotnet restore
-dotnet run --project MyCoreApp
+```bash
+git clone https://github.com/amarjotsinghh/MyCoreApp-cicd.git
+cd MyCoreApp-cicd
+````
 
+---
 
-Access the app at http://localhost:5000 (or the port specified in your app).
+### 2. Build & Run Locally (Docker)
 
-Docker Setup
+```bash
+docker build -t mycoreapp .
+docker run -p 5109:80 mycoreapp
+```
 
-Build the Docker image locally:docker build -t mycoreapp:latest .
+Then open your browser:
+📍 `http://localhost:5109`
 
+---
 
-Run the Docker container:docker run -p 8080:80 mycoreapp:latest
+### 3. GitHub Actions Workflows
 
+| Workflow                                  | Description                               |
+| ----------------------------------------- | ----------------------------------------- |
+| `.github/workflows/docker-build-push.yml` | Builds, approves, and pushes Docker image |
+| `.github/workflows/deploy-to-azure.yml`   | Deploys container to Azure App Service    |
 
-Access the app at http://localhost:8080.
-Push the image to Docker Hub:docker tag mycoreapp:latest your-dockerhub-username/mycoreapp:latest
-docker push your-dockerhub-username/mycoreapp:latest
+---
 
+### 4. GitHub Secrets Required
 
+| Secret Name            | Description                                |
+| ---------------------- | ------------------------------------------ |
+| `DOCKER_USERNAME`      | Your Docker Hub username                   |
+| `DOCKER_PASSWORD`      | Your Docker Hub password/token             |
+| `AZURE_WEBAPP_NAME`    | Azure App Service name                     |
+| `AZURE_RESOURCE_GROUP` | Resource group containing the app          |
+| `AZURE_CREDENTIALS`    | Azure Service Principal credentials (JSON) |
 
-CI/CD Pipeline
-The CI/CD pipeline is defined in .github/workflows/main.yml. It automates:
+To generate `AZURE_CREDENTIALS`, run:
 
-Building and testing the .NET application
-Building and pushing the Docker image to Docker Hub
-Deploying the image to Azure Web App
+```bash
+az ad sp create-for-rbac --name "github-deploy-sp" \
+  --role contributor \
+  --scopes /subscriptions/<your-subscription-id>/resourceGroups/<your-resource-group> \
+  --sdk-auth
+```
 
-To set up the pipeline:
+Copy the entire JSON output and save it as the `AZURE_CREDENTIALS` GitHub secret.
 
-Store the following secrets in your GitHub repository (Settings > Secrets and variables > Actions):
-DOCKERHUB_USERNAME: Your Docker Hub username
-DOCKERHUB_TOKEN: Your Docker Hub access token
-AZURE_CREDENTIALS: Azure service principal credentials (JSON format)
-AZURE_WEBAPP_NAME: Name of your Azure Web App
+---
 
+## 🌐 Deploying to Azure
 
-Push changes to the main branch to trigger the pipeline.
+Once your Azure App Service is set up and secrets are in place:
 
-Azure Deployment
+1. Trigger the GitHub Action: **"Deploy to Azure App Service"**
+2. Wait for it to complete successfully
+3. Visit your deployed app at:
 
-Create an Azure Web App for Containers (Linux) using the Azure Portal or CLI:az webapp create --resource-group <resource-group> --name <app-name> --plan <app-service-plan> --deployment-container-image-name your-dockerhub-username/mycoreapp:latest
+```text
+https://<your-app-name>.azurewebsites.net
+```
 
+---
 
-Configure the Web App to pull the Docker image from Docker Hub:
-Set DOCKER_REGISTRY_SERVER_URL to https://index.docker.io/v1/
-Set DOCKER_REGISTRY_SERVER_USERNAME to your Docker Hub username
-Set DOCKER_REGISTRY_SERVER_PASSWORD to your Docker Hub access token
+## 📋 License
 
+MIT License © 2025 Amarjot Singh
 
-Access the deployed app at https://<app-name>.azurewebsites.net.
+```
 
-Environment Variables
-The application uses the following environment variables (configure in Azure Web App or locally via appsettings.json or Docker):
+---
 
+Just copy and paste this into a file named `README.md` at the root of your repo.
 
+Let me know if you'd like to:
+- Add deployment screenshots or badges
+- Document environment variables
+- Make it more beginner-friendly
 
-Variable
-Description
-Default Value
-
-
-
-ASPNETCORE_ENVIRONMENT
-Environment (e.g., Development, Production)
-Production
-
-
-PORT
-Port for the app to listen on
-80
-
-
-Contributing
-
-Fork the repository.
-Create a feature branch (git checkout -b feature/your-feature).
-Commit your changes (git commit -m "Add your feature").
-Push to the branch (git push origin feature/your-feature).
-Open a Pull Request.
-
-License
-This project is licensed under the MIT License. See the LICENSE file for details.
+Happy to tweak it!
+```
